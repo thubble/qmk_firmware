@@ -1080,3 +1080,65 @@ bool caps_word_press_user(uint16_t keycode) {
             return false; // Deactivate Caps Word.
     }
 }
+
+
+// https://getreuer.info/posts/keyboards/achordion/index.html#achordion_chord
+// https://github.com/getreuer/qmk-keymap/blob/main/keymap.c
+bool achordion_chord(uint16_t tap_hold_keycode, keyrecord_t* tap_hold_record,
+                     uint16_t other_keycode, keyrecord_t* other_record) {
+    // Exceptionally consider the following chords as holds, even though they
+    // are on the same hand.
+    switch (tap_hold_keycode) {
+        case MT(MOD_LCTL, KC_S):  // Ctrl+F/G
+            if (other_keycode == MT(MOD_LSFT, KC_F) || other_keycode == KC_G) {
+                return true;
+            }
+            break;
+    }
+
+    // Also allow same-hand holds when the other key is in the bottom row.
+    // This allows Ctrl+Z/X/C/V/N etc., and doesn't seem to cause other issues.
+    // Needs the `% (MATRIX_ROWS / 2)` because my keyboard is split.
+    if (other_record->event.key.row % (MATRIX_ROWS / 2) == 3) {
+        return true;
+    }
+    // For some reason the B and N keys aren't detected as the correct row.
+    // Add a special case.
+    if (other_keycode == LT(2,KC_N) || other_keycode == LT(1,KC_B)) {
+        return true;
+    }
+
+    // Otherwise, follow the opposite hands rule.
+    return achordion_opposite_hands(tap_hold_record, other_record);
+}
+
+bool achordion_eager_mod(uint8_t mod) {
+    switch (mod) {
+        // Eagerly apply Shift and Ctrl mods. (same as default)
+        case MOD_LSFT:
+        case MOD_RSFT:
+        case MOD_LCTL:
+        case MOD_RCTL:
+        // Also eagerly apply Alt mods.
+        case MOD_LALT:
+        case MOD_RALT:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+uint16_t achordion_timeout(uint16_t tap_hold_keycode) {
+    switch (tap_hold_keycode) {
+        // layer switch keys
+        case LT(2,KC_A):
+        case LT(1,KC_SCOLON):
+        case LT(1,KC_B):
+        case LT(2,KC_N):
+            return 350;
+    }
+
+    // Use a default timeout of 800 ms.
+    return 800;
+}

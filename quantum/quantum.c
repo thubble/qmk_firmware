@@ -276,6 +276,9 @@ bool process_record_quantum(keyrecord_t *record) {
 #if defined(VIA_ENABLE)
             process_record_via(keycode, record) &&
 #endif
+#ifdef ACHORDION_ENABLE
+            process_achordion(keycode, record) &&
+#endif
             process_record_kb(keycode, record) &&
 #if defined(SECURE_ENABLE)
             process_secure(keycode, record) &&
