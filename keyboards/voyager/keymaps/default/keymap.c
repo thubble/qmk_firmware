@@ -1044,8 +1044,13 @@ bool achordion_chord(uint16_t tap_hold_keycode, keyrecord_t* tap_hold_record,
     // Exceptionally consider the following chords as holds, even though they
     // are on the same hand.
     switch (tap_hold_keycode) {
-        case MT(MOD_LCTL, KC_S):  // Ctrl+F/G
+        case MT(MOD_LCTL, KC_S):  // Ctrl + F/G
             if (other_keycode == MT(MOD_LSFT, KC_F) || other_keycode == KC_G) {
+                return true;
+            }
+            break;
+        case MT(MOD_RSFT, KC_J):  // Shift + ;:'"
+            if (other_keycode == LT(1,KC_SCLN) || other_keycode == KC_QUOTE) {
                 return true;
             }
             break;
@@ -1053,7 +1058,7 @@ bool achordion_chord(uint16_t tap_hold_keycode, keyrecord_t* tap_hold_record,
 
     // Also allow same-hand holds when the other key is in the bottom row.
     // This allows Ctrl+Z/X/C/V/N etc., and doesn't seem to cause other issues.
-    // Needs the `% (MATRIX_ROWS / 2)` because my keyboard is split.
+    // Needs the `% (MATRIX_ROWS / 2)` because the Voyager is split.
     if (other_record->event.key.row % (MATRIX_ROWS / 2) == 3) {
         return true;
     }
